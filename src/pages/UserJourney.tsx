@@ -140,8 +140,12 @@ const UserSessionsDashboard: React.FC = () => {
             if (!adminId) {
                 throw new Error('No admin ID found in localStorage');
             }
-
-            const response = await axios.get(`http://localhost:8000/get_top_users/${adminId}`);
+            const accessToken = localStorage.getItem('access_token')
+            const response = await axios.get(`http://localhost:8000/get_top_users/${adminId}`,{
+                headers: {
+                    Authorization: `Bearer ${accessToken}` 
+                  }
+            });
             setTopUsers(response.data);
             setIsLoading(false);
         } catch (err) {

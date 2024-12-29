@@ -17,8 +17,9 @@ interface AnalyticsData {
 export const analyticsService = {
   async getDashboardData(pageName: string): Promise<AnalyticsData> {
     try {
-        const adminId = localStorage.getItem('admin_id') 
-    //   const adminId = '674997337508096f9687d53a';
+    const adminId = localStorage.getItem('admin_id') 
+
+    const accessToken = localStorage.getItem('access_token')
       
       if (!adminId) {
         throw new Error('Admin ID not found in localStorage');
@@ -28,6 +29,9 @@ export const analyticsService = {
         params: {
           page_name: pageName,
           admin_id: adminId
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}` 
         }
       });
 

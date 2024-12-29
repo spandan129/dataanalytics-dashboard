@@ -42,11 +42,16 @@ const ContentDashboard: React.FC = () => {
     const fetchContentData = async () => {
       try {
         setIsLoading(true);
+        const accessToken = localStorage.getItem('access_token')
         const response = await axios.get<RawContentMetrics>('http://localhost:8000/dashboard', {
           params: {
             page_name: 'CONTENT',
             admin_id: storedAdminId
+          },
+          headers: {
+            Authorization: `Bearer ${accessToken}` 
           }
+          
         });
 
         setContentData(response.data);

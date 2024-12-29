@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock } from 'lucide-react';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import { useFeatureContext } from '../components/FeatureContext';
 
 export const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setFeatureList } = useFeatureContext();
+  const { setRole } = useFeatureContext();
+
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     try {
       const response = await axios.post('http://localhost:8000/admin/login', {
         username,
@@ -21,17 +25,29 @@ export const Login: React.FC = () => {
       });
 
       if (response.data.access_token) {
-        // Decode the JWT token
-        const decodedToken = jwt_decode(response.data.access_token);
+        const decodedToken = jwtDecode(response.data.access_token);
+        console.log(decodedToken)
 
-        // Store the admin ID in localStorage
         localStorage.setItem('admin_id', decodedToken.admin_id);
 
-        // Optionally, store the full token if needed
-        localStorage.setItem('access_token', response.data.access_token);
+        if (decodedToken.role === 'SUPERADMIN') {
+          navigate('/documentation');
+        } else {
+          setFeatureList(decodedToken.feature_list);
 
-        // Navigate to dashboard
-        navigate('/dashboard');
+          localStorage.setItem('access_token', response.data.access_token);
+
+          if (decodedToken.feature_list.includes('Main')) {
+            navigate('/dashboard');
+          } else if (decodedToken.feature_list.includes('DEVICE_STATS')) {
+            navigate('/user-behavior');
+          } else if (decodedToken.feature_list.includes('CONTENT')) {
+            navigate('/content-metrics');
+          } else if (decodedToken.feature_list.includes('USERSTATS')) {
+            navigate('/user-journey');
+          }
+        }
+
       }
     } catch (err) {
       setError('Login failed. Please check your credentials.');
